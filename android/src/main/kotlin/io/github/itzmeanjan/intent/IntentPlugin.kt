@@ -7,6 +7,7 @@ import android.os.Environment
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -17,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class IntentPlugin(private val registrar: Registrar, private val activity: Activity) : MethodCallHandler {
+class IntentPlugin(private val registrar: Registrar, private val activity: Activity) : MethodCallHandler, FlutterPlugin {
 
     private var activityCompletedCallBack: ActivityCompletedCallBack? = null
     lateinit var toBeCapturedImageLocationURI: Uri
@@ -30,6 +31,18 @@ class IntentPlugin(private val registrar: Registrar, private val activity: Activ
             channel.setMethodCallHandler(IntentPlugin(registrar, registrar.activity()))
         }
 
+    }
+
+    override fun onAttachedToEngine(@NonNull binding: FlutterPluginBinding){
+        channel = MethodChannel(binding.getBinaryMessenger(), "intent")
+        this.binding = binding
+        channel.setMethodCallHandler(this)
+
+    }
+
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPluginBinding?) {
+        channel.setMethodCallHandler(null)
+        // TODO: your plugin is no longer attached to a Flutter experience.
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
